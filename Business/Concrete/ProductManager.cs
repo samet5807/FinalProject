@@ -1,5 +1,8 @@
 ﻿using Business.Abstract;
 using Business.Constants;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
+using Core.CrossCuttingConcerns.Validations;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.InMemory;
@@ -15,21 +18,19 @@ using System.Threading.Tasks;
 namespace Business.Concrete
 {
     public class ProductManager : IProductService
-    {   
-        IProductDal  _productDal;
-        
+    {
+        IProductDal _productDal;
+
 
         public ProductManager(IProductDal productDal)
         {
             _productDal = productDal;
         }
 
+        [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
-            if (product.ProductName.Length<2)
-            {
-                return new ErrorResult(Messages.ProductNameInvalıd);
-            }
+            
 
 
             _productDal.Add(product);
@@ -40,12 +41,12 @@ namespace Business.Concrete
         {
             // İş kodları 
 
-            if (DateTime.Now.Hour == 22)
+            if (DateTime.Now.Hour == 10)
             {
                 return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
             }
 
-            return new SuccessDataResult<List<Product>>( _productDal.GetAll(),Messages.ProductAllListed);
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductAllListed);
         }
 
         public IDataResults<List<Product>> GetAllByCategoryId(int id)
@@ -55,7 +56,7 @@ namespace Business.Concrete
 
         public IDataResults<Product> GetById(int productId)
         {
-            return new SuccessDataResult<Product> (_productDal.Get(p => p.ProductId == productId));
+            return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == productId));
         }
 
         public IDataResults<List<ProductDetailDto>> GetProductDetails()
@@ -63,6 +64,6 @@ namespace Business.Concrete
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
         }
 
-      
+
     }
 }
